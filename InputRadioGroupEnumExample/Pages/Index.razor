@@ -5,29 +5,37 @@
 <h1>Hello, world!</h1>
 
 <EditForm Model="model">
-    <InputRadioGroup class="seasons-radio" @bind-Value="model.Season"></InputRadioGroup>
+    InputRadioGroupEnum:<br/>
+    <InputRadioGroupEnum class="seasons-radio" @bind-Value="model.Season"></InputRadioGroupEnum>
+    <br />
+    InputRadioGroup:<br/>
+    <InputRadioGroup @bind-Value="model.RadioGroupValue" Options="@Options"></InputRadioGroup>
 </EditForm>
 
 Selected season: @model.Season
-    
+Option: @model.RadioGroupValue
 
-    @code{
-        Model model = new Model();
 
-        class Model
-        {
-            public Season Season { get; set; } = Season.Autumn;
-        }
+@code{
+    public string[] Options = { "abra", "cadabra" };
+    Model model = new Model();
 
-        enum Season
-        {
-            [Display(Name = "Spring")]
-            Spring,
-            [Display(Name = "Summer")]
-            Summer,
-            [Display(Name = "Autumn")]
-            Autumn,
-            [Display(Name = "Winter")]
-            Winter,
-        }
+    class Model
+    {
+        public String RadioGroupValue { get; set; }
+
+        public Season Season { get; set; } = Season.Autumn;
     }
+
+    enum Season
+    {
+        [Display(Name = "Spring")]
+        Spring,
+        [Display(Name = "Summer")]
+        Summer,
+        [Display(Name = "Autumn")]
+        Autumn,
+        [Display(Name = "Winter")]
+        Winter,
+    }
+}

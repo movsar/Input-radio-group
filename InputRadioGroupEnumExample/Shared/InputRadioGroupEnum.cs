@@ -13,9 +13,8 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace InputRadioGroupEnumExample.Shared
 {
-    public sealed class InputRadioGroup<TString> : InputBase<TString>
+    public sealed class InputRadioGroupEnum<TEnum> : InputBase<TEnum>
     {
-        [Parameter] public string[] Options { get; set; }
         private readonly Dictionary<string, bool> CheckStatuses = new Dictionary<string, bool>();
 
         protected override void BuildRenderTree(RenderTreeBuilder builder)
@@ -25,9 +24,10 @@ namespace InputRadioGroupEnumExample.Shared
             builder.AddMultipleAttributes(1, AdditionalAttributes);
             builder.AddAttribute(2, "class", CssClass);
             builder.AddAttribute(3, "value", BindConverter.FormatValue(CurrentValueAsString));
-
+            
             // Add an option element per enum value
-            foreach (string value in Options)
+            var enumType = GetEnumType();
+            foreach (TEnum value in Enum.GetValues(enumType))
             {
                 CheckStatuses.TryAdd(value.ToString(), value.ToString() == CurrentValueAsString);
                 builder.OpenElement(4, "div");
@@ -41,7 +41,7 @@ namespace InputRadioGroupEnumExample.Shared
 
                 builder.OpenElement(10, "label");
                 builder.AddAttribute(11, "for", value.ToString());
-                builder.AddContent(12, value.ToString());
+                builder.AddContent(12, GetDisplayName(value));
                 builder.CloseElement();
 
                 builder.CloseElement();
@@ -51,7 +51,8 @@ namespace InputRadioGroupEnumExample.Shared
         }
 
         EventCallback<ChangeEventArgs> HandleValueChange(string currentRadioName) {
-            foreach (string value in Options)
+            var enumType = GetEnumType();
+            foreach (TEnum value in Enum.GetValues(enumType))
             {
                 CheckStatuses[value.ToString()] = value.ToString() == CurrentValueAsString;
             }
@@ -63,9 +64,9 @@ namespace InputRadioGroupEnumExample.Shared
             base.OnAfterRender(firstRender);
         }
 
-        protected override bool TryParseValueFromString(string value, out TString result, out string validationErrorMessage)
+        protected override bool TryParseValueFromString(string value, out TEnum result, out string validationErrorMessage)
         {
-            if (BindConverter.TryConvertTo(value, CultureInfo.CurrentCulture, out TString parsedValue))
+            if (BindConverter.TryConvertTo(value, CultureInfo.CurrentCulture, out TEnum parsedValue))
             {
                 result = parsedValue;
                 validationErrorMessage = null;
@@ -75,7 +76,7 @@ namespace InputRadioGroupEnumExample.Shared
             // Map null/empty value to null if the bound object is nullable
             if (string.IsNullOrEmpty(value))
             {
-                var nullableType = Nullable.GetUnderlyingType(typeof(TString));
+                var nullableType = Nullable.GetUnderlyingType(typeof(TEnum));
                 if (nullableType != null)
                 {
                     result = default;
@@ -84,11 +85,30 @@ namespace InputRadioGroupEnumExample.Shared
                 }
             }
 
-
             // The value is invalid => set the error message
             result = default;
             validationErrorMessage = $"The {FieldIdentifier.FieldName} field is not valid.";
             return false;
+        }
+
+        private string GetDisplayName(TEnum value)
+        {
+            // Read the Display attribute name
+            var member = value.GetType().GetMember(value.ToString())[0];
+            var displayAttribute = member.GetCustomAttribute<DisplayAttribute>();
+            if (displayAttribute != null)
+                return displayAttribute.GetName();
+
+            return value.ToString();
+        }
+
+        private Type GetEnumType()
+        {
+            var nullableType = Nullable.GetUnderlyingType(typeof(TEnum));
+            if (nullableType != null)
+                return nullableType;
+
+            return typeof(TEnum);
         }
     }
 }
