@@ -4,12 +4,11 @@
 
 <h1>Hello, world!</h1>
 
-Welcome to your new app.
-
-<SurveyPrompt Title="How is Blazor working for you?" />
 <EditForm Model="model">
-    <InputRadioGroup @bind-Value="model.Season"></InputRadioGroup>
+    <InputRadioGroup class="seasons-radio" @bind-Value="model.Season"></InputRadioGroup>
 </EditForm>
+
+Selected season: @model.Season
     
 
     @code{

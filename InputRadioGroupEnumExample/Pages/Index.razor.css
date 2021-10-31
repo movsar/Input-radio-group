@@ -1,0 +1,18 @@
+﻿.seasons-radio {
+    color: brown;
+}
+
+    .seasons-radio div {
+        display: block;
+        cursor: pointer;
+    }
+
+        .seasons-radio div input {
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
+        .seasons-radio div label {
+            cursor: pointer;
+            font-weight: bold
+        }
